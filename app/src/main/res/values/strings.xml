@@ -2,4 +2,6 @@
     <string name="app_name">Teste Bluetooth</string>
     <string name="escolher_dispositivo">Escolher Dispositivo</string>
     <string name="nenhum_dispositivo_escolhido">Nenhum dispositivo escolhido</string>
+    <string name="ligar">Ligar</string>
+    <string name="desligar">Desligar</string>
 </resources>

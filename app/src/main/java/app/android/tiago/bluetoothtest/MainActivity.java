@@ -32,6 +32,10 @@ public class MainActivity extends AppCompatActivity {
         //Definir Butoes
         btnEscolher = findViewById(R.id.btnEscolher);
         btnEscolher.setOnClickListener(btnEscolher_click);
+        btnLigar = findViewById(R.id.btnLigar);
+        btnLigar.setOnClickListener(btnLigar_click);
+        btnDesligar = findViewById(R.id.btnDesligar);
+        btnDesligar.setOnClickListener(btnDesligar_click);
 
         txtDispositivo = findViewById(R.id.txtDispositivo);
 
@@ -86,6 +90,24 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             escolherDispositivo();
+        }
+    };
+
+    private Button btnLigar;
+
+    private View.OnClickListener btnLigar_click = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //codigo pendente
+        }
+    };
+
+    private Button btnDesligar;
+
+    private View.OnClickListener btnDesligar_click = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //condigo pendente
         }
     };
 
