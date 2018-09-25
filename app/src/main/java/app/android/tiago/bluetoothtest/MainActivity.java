@@ -28,7 +28,9 @@ public class MainActivity extends AppCompatActivity {
     //Variaveis
     private final int REQUEST_ENABLE_BT = 0;
     public BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private TextView txtDispositivo;
+    public BluetoothDevice dispositivoSeleccionado = null;
+    private TextView txtDispositivoNome;
+    private TextView txtDispositivoAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
         btnDesligar = findViewById(R.id.btnDesligar);
         btnDesligar.setOnClickListener(btnDesligar_click);
 
-        txtDispositivo = findViewById(R.id.txtDispositivo);
+        txtDispositivoNome = findViewById(R.id.txtDispositivoNome);
+        txtDispositivoAddress = findViewById(R.id.txtDispositivoAddress);
 
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -56,18 +59,25 @@ public class MainActivity extends AppCompatActivity {
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
             List<String> lista = new ArrayList<String>();
+            List<String> listaNome = new ArrayList<String>();
+            List<String> listaAddress = new ArrayList<String>();
             for (BluetoothDevice device : pairedDevices) {
+                listaAddress.add(device.getAddress());
+                listaNome.add(device.getName());
                 lista.add(device.getName() + "\n" + device.getAddress());
             }
 
             final String[] arLista = lista.toArray(new String[lista.size()]);
+            final String[] arListaNome = listaNome.toArray(new String[listaNome.size()]);
+            final String[] arListaAddress = listaAddress.toArray(new String[listaAddress.size()]);
 
             AlertDialog.Builder dialogoA = new AlertDialog.Builder(MainActivity.this);
-            dialogoA.setTitle("Escolher")
-                    //.setMessage("Escolha o dispositivo")
+            dialogoA.setTitle("Escolher dispositivo")
                     .setItems(arLista, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            txtDispositivo.setText(arLista[which]);
+                            txtDispositivoNome.setText(arListaNome[which]);
+                            txtDispositivoAddress.setText(arListaAddress[which]);
+                            dispositivoSeleccionado = mBluetoothAdapter.getRemoteDevice(arListaAddress[which]);
                         }
                     })
                     .show();
@@ -87,6 +97,28 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void ligar() {
+        if (dispositivoSeleccionado == null){
+            AlertDialog.Builder dialogoA = new AlertDialog.Builder(MainActivity.this);
+            dialogoA.setTitle("Erro")
+                    .setMessage("Não foi escolhido nenhum dispositivo. Escolha um dispositivo primeiro.")
+                    .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+        }
+        else{
+            //TODO já tenho o BluetoothDevice pronto, agora é fazer a ligação, esta parte não dá para experimentar sem o HC-06 ligado! oops!
+
+        }
+
+    }
+
+    public void desligar() {
+
+    }
 
     //Click listeners
 
@@ -104,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener btnLigar_click = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            //codigo pendente
+            ligar();
         }
     };
 
@@ -113,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener btnDesligar_click = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            //condigo pendente
+            //TODO codigo pendente
         }
     };
 
@@ -122,8 +154,11 @@ public class MainActivity extends AppCompatActivity {
 
     // Implementação da comunicação bluetooth
 
+
     ThreadConnected myThreadConnected;
     private UUID myUUID;
+    private final String UUID_STRING_WELL_KNOWN_SPP =
+            "7f0795b6-d136-45f7-8776-a11afae79ebf";
 
     //Called in ThreadConnectBTdevice once connect successed
     //to start ThreadConnected

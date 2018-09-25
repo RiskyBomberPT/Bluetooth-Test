@@ -23,10 +23,16 @@
             android:text="@string/escolher_dispositivo" />
 
         <TextView
-            android:id="@+id/txtDispositivo"
+            android:id="@+id/txtDispositivoNome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/nenhum_dispositivo_escolhido" />
+
+        <TextView
+            android:id="@+id/txtDispositivoAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=" " />
 
         <LinearLayout
             android:layout_width="match_parent"
