@@ -1,5 +1,6 @@
 package app.android.tiago.bluetoothtest;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -45,11 +46,35 @@ public class MainActivity extends AppCompatActivity {
         btnDesligar = findViewById(R.id.btnDesligar);
         btnDesligar.setOnClickListener(btnDesligar_click);
 
+        myUUID = UUID.fromString(UUID_STRING_WELL_KNOWN_SPP);
+
         txtDispositivoNome = findViewById(R.id.txtDispositivoNome);
         txtDispositivoAddress = findViewById(R.id.txtDispositivoAddress);
 
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if(myThreadConnectBTdevice!=null){
+            myThreadConnectBTdevice.cancel();
+        }
+    }
+
+    // Desligar se o bluetooth não for ligado
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode==REQUEST_ENABLE_BT){
+            if(resultCode != Activity.RESULT_OK){
+                Toast.makeText(this,
+                        "É necessário ativar o bluetooth",
+                        Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
     }
 
 
@@ -110,14 +135,33 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         }
         else{
-            //TODO já tenho o BluetoothDevice pronto, agora é fazer a ligação, esta parte não dá para experimentar sem o HC-06 ligado! oops!
+            //TODO em construção!
+            BluetoothDevice device = dispositivoSeleccionado;
+            Toast.makeText(MainActivity.this,
+                    "Name: " + device.getName() + "\n"
+                            + "Address: " + device.getAddress() + "\n"
+                            + "BondState: " + device.getBondState() + "\n"
+                            + "BluetoothClass: " + device.getBluetoothClass() + "\n"
+                            + "Class: " + device.getClass(),
+                    Toast.LENGTH_LONG).show();
+
+            //textStatus.setText("start ThreadConnectBTdevice");
+            myThreadConnectBTdevice = new ThreadConnectBTdevice(device);
+            myThreadConnectBTdevice.start();
+
 
         }
 
     }
 
     public void desligar() {
-
+        if(myThreadConnectBTdevice!=null){
+            myThreadConnectBTdevice.cancel();
+            myThreadConnectBTdevice = null;
+        }
+        else{
+            Toast.makeText(getApplicationContext(),"Não existe ligação", Toast.LENGTH_LONG).show();
+        }
     }
 
     //Click listeners
@@ -145,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener btnDesligar_click = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            //TODO codigo pendente
+            desligar();
         }
     };
 
@@ -156,9 +200,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     ThreadConnected myThreadConnected;
+    ThreadConnectBTdevice myThreadConnectBTdevice;
+
     private UUID myUUID;
+
     private final String UUID_STRING_WELL_KNOWN_SPP =
-            "7f0795b6-d136-45f7-8776-a11afae79ebf";
+            //"7f0795b6-d136-45f7-8776-a11afae79ebf";
+            "00001101-0000-1000-8000-00805F9B34FB";
+
 
     //Called in ThreadConnectBTdevice once connect successed
     //to start ThreadConnected
@@ -175,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
     private class ThreadConnectBTdevice extends Thread {
 
         private BluetoothSocket bluetoothSocket = null;
-        private final BluetoothDevice bluetoothDevice;
+        private BluetoothDevice bluetoothDevice;
 
 
         private ThreadConnectBTdevice(BluetoothDevice device) {
@@ -183,9 +232,11 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 bluetoothSocket = device.createRfcommSocketToServiceRecord(myUUID);
+                Toast.makeText(getApplicationContext(),"Ponto 1", Toast.LENGTH_LONG).show();
                 // TODO IMPLEMENTAR ISTO textStatus.setText("bluetoothSocket: \n" + bluetoothSocket);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
+                Toast.makeText(getApplicationContext(),"Erro 1", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
         }
@@ -204,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void run() {
-                        //TODO IMPLEMENTAR ISTO textStatus.setText("something wrong bluetoothSocket.connect(): \n" + eMessage);
+                        Toast.makeText(getApplicationContext(),"Erro 2 \n"+ eMessage, Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -212,6 +263,7 @@ public class MainActivity extends AppCompatActivity {
                     bluetoothSocket.close();
                 } catch (IOException e1) {
                     // TODO Auto-generated catch block
+                    Toast.makeText(getApplicationContext(),"Erro 3", Toast.LENGTH_LONG).show();
                     e1.printStackTrace();
                 }
             }
@@ -247,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
         public void cancel() {
 
             Toast.makeText(getApplicationContext(),
-                    "close bluetoothSocket",
+                    "Ligação Bluetooth terminada",
                     Toast.LENGTH_LONG).show();
 
             try {
